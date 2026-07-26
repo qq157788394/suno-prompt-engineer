@@ -1,0 +1,74 @@
+name: Release Skill Package
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create skill package
+        run: |
+          # 打包为 suno-prompt-engineer-v{version}.zip
+          # 解压后根目录即 SKILL.md，用户可直接安装
+          cd suno-prompt-engineer
+          zip -r ../suno-prompt-engineer-v${{ steps.version.outputs.version }}.zip \
+            SKILL.md \
+            LICENSE \
+            README.md \
+            .gitignore \
+            references/
+
+      - name: Generate checksums
+        run: |
+          cd ../
+          sha256sum suno-prompt-engineer-v${{ steps.version.outputs.version }}.zip \
+            > suno-prompt-engineer-v${{ steps.version.outputs.version }}.zip.sha256
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: v${{ steps.version.outputs.version }}
+          body: |
+            ## Suno Prompt Engineer v${{ steps.version.outputs.version }}
+
+            一套用于撰写高质量 Suno AI 音乐提示词（Styles + Lyrics）的 WorkBuddy Skill。
+            主Agent + 五位专家子Agent 协作，支持三种工作流。
+
+            ### 安装
+
+            1. 下载 `suno-prompt-engineer-v${{ steps.version.outputs.version }}.zip`
+            2. 解压到 Agent 技能目录：
+               - **WorkBuddy**: `~/.workbuddy/skills/`
+               - **TraeWork**: `~/.trae/skills/`
+               - **Codex**: `~/.codex/skills/`
+               或项目级 `.workbuddy/skills/`
+            3. 刷新技能列表
+
+            ### 可用工作流
+
+            | 工作流 | 说明 |
+            |--------|------|
+            | 开发新模板 | 搜索 → Styles → Lyrics → 质检 → 归档 |
+            | 套用现有模板 | 匹配模板 → 套用属性 → 交付 |
+            | 为指定歌曲定制 | 同开发流程，按实际结构 |
+
+            ### 发布到 skillhub.cn
+
+            本 `.zip` 可直接上传至 [skillhub.cn](https://skillhub.cn) 等平台发布，
+            解压后 SKILL.md 在根目录，符合各 Agent 平台的安装规范。
+          files: |
+            suno-prompt-engineer-v${{ steps.version.outputs.version }}.zip
+            suno-prompt-engineer-v${{ steps.version.outputs.version }}.zip.sha256
+          generate_release_notes: true
