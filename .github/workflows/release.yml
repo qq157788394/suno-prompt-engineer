@@ -28,7 +28,6 @@ jobs:
           cd suno-prompt-engineer
           zip -r "../${ZIP_NAME}" \
             SKILL.md \
-            LICENSE \
             README.md \
             references \
             -x "references/template-index.md" || true
