@@ -16,28 +16,38 @@ jobs:
 
       - name: Get version from tag
         id: version
-        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
 
       - name: Create skill package
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
-          # 打包为 suno-prompt-engineer-v{version}.zip
-          # 解压后根目录即 SKILL.md，用户可直接安装
+          set -euxo pipefail
+          ZIP_NAME="suno-prompt-engineer-v${VERSION}.zip"
+          # 进入 suno-prompt-engineer 目录，把内容打包到 zip 根目录
           cd suno-prompt-engineer
-          zip -r ../suno-prompt-engineer-v${{ steps.version.outputs.version }}.zip \
+          zip -r "../${ZIP_NAME}" \
             SKILL.md \
             LICENSE \
             README.md \
-            .gitignore \
-            references/
+            references \
+            -x "references/template-index.md" || true
+          cd ..
+          echo "ZIP_PATH=${PWD}/${ZIP_NAME}" >> "$GITHUB_OUTPUT"
+          echo "Created: ${ZIP_NAME}"
+          ls -la "${ZIP_NAME}"
 
       - name: Generate checksums
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
-          cd ../
-          sha256sum suno-prompt-engineer-v${{ steps.version.outputs.version }}.zip \
-            > suno-prompt-engineer-v${{ steps.version.outputs.version }}.zip.sha256
+          set -euxo pipefail
+          ZIP_NAME="suno-prompt-engineer-v${VERSION}.zip"
+          sha256sum "${ZIP_NAME}" > "${ZIP_NAME}.sha256"
+          echo "SHA256 file generated"
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
         with:
           name: v${{ steps.version.outputs.version }}
           body: |
@@ -46,14 +56,14 @@ jobs:
             一套用于撰写高质量 Suno AI 音乐提示词（Styles + Lyrics）的 WorkBuddy Skill。
             主Agent + 五位专家子Agent 协作，支持三种工作流。
 
-            ### 安装
+            ### 安装方式
 
             1. 下载 `suno-prompt-engineer-v${{ steps.version.outputs.version }}.zip`
-            2. 解压到 Agent 技能目录：
-               - **WorkBuddy**: `~/.workbuddy/skills/`
-               - **TraeWork**: `~/.trae/skills/`
-               - **Codex**: `~/.codex/skills/`
-               或项目级 `.workbuddy/skills/`
+            2. 解压到 Agent 技能目录即可使用：
+               - WorkBuddy: `~/.workbuddy/skills/suno-prompt-engineer/`
+               - TraeWork: `~/.trae/skills/suno-prompt-engineer/`
+               - Codex: `~/.codex/skills/suno-prompt-engineer/`
+               或项目级 `.workbuddy/skills/suno-prompt-engineer/`
             3. 刷新技能列表
 
             ### 可用工作流
@@ -64,10 +74,9 @@ jobs:
             | 套用现有模板 | 匹配模板 → 套用属性 → 交付 |
             | 为指定歌曲定制 | 同开发流程，按实际结构 |
 
-            ### 发布到 skillhub.cn
+            ### 上传到 skillhub.cn
 
-            本 `.zip` 可直接上传至 [skillhub.cn](https://skillhub.cn) 等平台发布，
-            解压后 SKILL.md 在根目录，符合各 Agent 平台的安装规范。
+            本 `.zip` 可直接上传至 skillhub.cn 等平台发布。解压后 SKILL.md 在根目录，符合各 Agent 平台的安装规范。
           files: |
             suno-prompt-engineer-v${{ steps.version.outputs.version }}.zip
             suno-prompt-engineer-v${{ steps.version.outputs.version }}.zip.sha256
