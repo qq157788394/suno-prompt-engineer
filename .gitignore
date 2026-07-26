@@ -5,7 +5,6 @@ AI音乐制作人工作手册v1/
 # ===== User private assets — DO NOT track =====
 templates/
 build/
-suno-prompt-engineer/references/template-index.md
 
 # ===== Local OS / editor junk =====
 .DS_Store
