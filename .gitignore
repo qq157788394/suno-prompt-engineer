@@ -1,0 +1,16 @@
+# ===== Private reference materials — DO NOT open-source =====
+# Feishu exports: AI 音乐制作人工作手册 + 13 歌手系列模板 (核心私有资产)
+AI音乐制作人工作手册v1/
+
+# ===== User private assets — DO NOT track =====
+templates/
+build/
+suno-prompt-engineer/references/template-index.md
+
+# ===== Local OS / editor junk =====
+.DS_Store
+Thumbs.db
+*.swp
+
+# ===== Agent memory / local state — DO NOT track =====
+.workbuddy/

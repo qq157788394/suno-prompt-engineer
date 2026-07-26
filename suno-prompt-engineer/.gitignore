@@ -1,0 +1,33 @@
+# ===== Local private data — DO NOT commit =====
+# Agent populates this at runtime with YOUR private template names.
+references/template-index.md
+
+# ===== Runtime build artifacts — DO NOT commit =====
+# Main Agent writes sub-agent deliverables here during a run (NN-*.md).
+# These are intermediate products, not part of the skill source.
+build/
+
+# ===== OS / editor junk =====
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# ===== Misc =====
+*.log
+node_modules/
+
+# ===== AI Agent tool directories (local state / caches — DO NOT commit) =====
+.workbuddy/
+.trae/
+.qoder/
+.codex/
+.claude/
+
+# NOTE: Your private reference materials (Feishu exports: 主手册 + 13 歌手系列模板,
+# glossary 原件, Noema Lab / Complete Guide 等) are kept OUTSIDE this repo
+# (in ../AI音乐制作人工作手册v1/) and are never bundled.
+# They are protected by the project-root .gitignore, not this one.
